@@ -110,9 +110,6 @@
 
     </div>
     
-    <!-- This div will contain the ripple animation -->
-    <div id="ripple-container" class="absolute top-0 left-0 w-full h-full pointer-events-none z-20"></div>
-
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -296,7 +293,7 @@
             }
         }
         
-        // **FIX**: Use 'click' event for better mobile compatibility
+        // Use 'click' event for better mobile compatibility
         respectButton.addEventListener('click', handleInteraction);
 
         initializeAppAndAuth();
