@@ -17,7 +17,7 @@
         body {
             font-family: 'Inter', sans-serif;
             touch-action: manipulation; /* Prevents double-tap zoom on mobile */
-            background-color: #0c0a09; /* Deeper, near-black background */
+            background-color: #1e293b; /* Softer dark slate background */
         }
 
         /* Canvas for the background particle animation */
@@ -32,15 +32,15 @@
 
         /* The button's soft glow effect */
         .respect-button {
-            border: 2px solid rgba(113, 113, 122, 0.3);
-            box-shadow: 0 0 25px rgba(113, 113, 122, 0.2), inset 0 0 15px rgba(113, 113, 122, 0.1);
+            border: 2px solid rgba(100, 116, 139, 0.4); /* Lighter border */
+            box-shadow: 0 0 25px rgba(100, 116, 139, 0.2), inset 0 0 15px rgba(100, 116, 139, 0.1);
             transition: all 0.4s ease;
         }
         
         /* Hover interaction for the glow */
         .respect-button:hover:not(:disabled) {
-            border-color: rgba(161, 161, 170, 0.4);
-            box-shadow: 0 0 35px rgba(113, 113, 122, 0.3), inset 0 0 20px rgba(113, 113, 122, 0.2);
+            border-color: rgba(148, 163, 184, 0.5);
+            box-shadow: 0 0 35px rgba(100, 116, 139, 0.3), inset 0 0 20px rgba(100, 116, 139, 0.2);
         }
 
         /* The button's pressed state */
@@ -57,7 +57,7 @@
         .ripple {
             position: absolute;
             border-radius: 50%;
-            border: 2px solid #a1a1aa;
+            border: 2px solid #94a3b8; /* Lighter ripple */
             pointer-events: none;
             animation: ripple-effect 1.5s ease-out forwards;
         }
@@ -74,7 +74,7 @@
         }
     </style>
 </head>
-<body class="bg-stone-950 text-white overflow-hidden">
+<body class="bg-slate-800 text-white overflow-hidden">
     
     <!-- Background animation canvas -->
     <canvas id="background-canvas"></canvas>
@@ -84,45 +84,31 @@
         
         <!-- Header text -->
         <header class="text-center mb-10">
-            <h1 class="text-4xl md:text-6xl font-black text-gray-400 tracking-tight">Endless Remembrance</h1>
-            <p class="text-lg md:text-xl text-stone-500 mt-3">For all that has been lost</p>
+            <h1 class="text-4xl md:text-6xl font-black text-slate-300 tracking-tight">Endless Remembrance</h1>
+            <p class="text-lg md:text-xl text-slate-400 mt-3">For all that has been lost</p>
         </header>
 
         <!-- Counter -->
         <div class="mb-12 text-center" id="counter-container">
-            <p id="respect-counter" class="text-7xl md:text-8xl font-bold text-gray-200 transition-opacity duration-700">0</p>
-            <p class="text-stone-600 text-sm tracking-widest mt-2">REMEMBRANCES WORLDWIDE</p>
+            <p id="respect-counter" class="text-7xl md:text-8xl font-bold text-slate-200 transition-opacity duration-700">0</p>
+            <p class="text-slate-500 text-sm tracking-widest mt-2">Remembrances</p>
         </div>
 
         <!-- Main interactive button -->
-        <div id="button-container" class="relative">
-            <button id="respect-button" class="respect-button w-48 h-48 md:w-56 md:h-56 rounded-full bg-transparent flex items-center justify-center text-6xl md:text-7xl font-bold select-none focus:outline-none" disabled>
-            </button>
-        </div>
+        <button id="respect-button" class="respect-button w-48 h-48 md:w-56 md:h-56 rounded-full bg-transparent flex items-center justify-center text-6xl md:text-7xl font-bold select-none focus:outline-none relative z-20">
+        </button>
         
-        <!-- Added instruction text -->
-        <p id="instruction-text" class="text-stone-500 text-sm mt-8 text-center opacity-0 transition-opacity duration-1000">Press the ring to offer a thought</p>
+        <!-- Instruction text -->
+        <p id="instruction-text" class="text-slate-400 text-sm mt-8 text-center opacity-0 transition-opacity duration-1000">Press the ring to offer a thought</p>
 
         <!-- Footer -->
-        <footer class="absolute bottom-4 text-center text-stone-700 text-sm">
+        <footer class="absolute bottom-4 text-center text-slate-600 text-sm">
             <p>&copy; 2024. A silent echo.</p>
         </footer>
 
     </div>
     
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, updateDoc, increment, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-        // --- Firebase Setup ---
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-respects-app';
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        
+    <script>
         // --- DOM Element References ---
         const respectButton = document.getElementById('respect-button');
         const instructionText = document.getElementById('instruction-text');
@@ -130,10 +116,9 @@
         const backgroundCanvas = document.getElementById('background-canvas');
 
         // --- State & Settings ---
-        let lastCount = 0;
+        let count = 0;
         let isUpdating = false;
         let firstClick = true;
-        const counterRef = doc(db, `artifacts/${appId}/public/data/respects/counter`);
 
         // --- Sound Synthesizer (Sorrowful Chord) ---
         const synth = new Tone.PolySynth(Tone.Synth, {
@@ -166,7 +151,7 @@
 
         function drawParticles() {
             ctx.clearRect(0, 0, backgroundCanvas.width, backgroundCanvas.height);
-            ctx.fillStyle = 'rgba(161, 161, 170, 0.4)';
+            ctx.fillStyle = 'rgba(148, 163, 184, 0.3)'; // Lighter particle color
             particles.forEach(p => {
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
@@ -193,15 +178,12 @@
         /**
          * Updates the counter display with a fade animation.
          */
-        function updateCounter(newCount) {
-            if (newCount !== lastCount) {
-                lastCount = newCount;
-                respectCounter.style.opacity = 0;
-                setTimeout(() => {
-                    respectCounter.textContent = newCount.toLocaleString();
-                    respectCounter.style.opacity = 1;
-                }, 350);
-            }
+        function updateCounter() {
+            respectCounter.style.opacity = 0;
+            setTimeout(() => {
+                respectCounter.textContent = count.toLocaleString();
+                respectCounter.style.opacity = 1;
+            }, 350);
         }
 
         /**
@@ -225,7 +207,7 @@
          */
         async function handleInteraction(event) {
             event.preventDefault();
-            if (isUpdating || respectButton.disabled) return;
+            if (isUpdating) return;
             isUpdating = true;
 
             // Hide instruction text on first click
@@ -234,69 +216,41 @@
                 firstClick = false;
             }
 
+            // Start audio and play sound
             await Tone.start();
-            // Play a sad minor chord
             synth.triggerAttackRelease(["C3", "Eb3", "G3"], "2n");
+            
+            // Trigger vibration
             if (window.navigator.vibrate) {
                 window.navigator.vibrate(50);
             }
 
+            // Create visual effect
             createRipple();
+            
+            // Update local counter
+            count++;
+            updateCounter();
 
-            try {
-                await updateDoc(counterRef, { count: increment(1) });
-            } catch (error) {
-                if (error.code === 'not-found') {
-                    await setDoc(counterRef, { count: 1 });
-                } else {
-                    console.error("Failed to update counter: ", error);
-                }
-            }
-
+            // Set a brief cooldown to prevent spamming
             setTimeout(() => { isUpdating = false; }, 500);
         }
 
         // --- Initialization & Event Listeners ---
-        async function initializeAppAndAuth() {
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    onSnapshot(counterRef, (doc) => {
-                        if (doc.exists()) {
-                            updateCounter(doc.data().count);
-                        } else {
-                            updateCounter(0);
-                        }
-                    }, (error) => {
-                        console.error("@firebase/firestore: Snapshot listener error:", error);
-                    });
-                    respectButton.disabled = false;
-                    // Delay showing the instruction text
-                    setTimeout(() => {
-                        if (firstClick) {
-                           instructionText.style.opacity = 1;
-                        }
-                    }, 1500);
-                } else {
-                    respectButton.disabled = true;
+        function initialize() {
+            // Delay showing the instruction text
+            setTimeout(() => {
+                if (firstClick) {
+                   instructionText.style.opacity = 1;
                 }
-            });
-
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Firebase sign-in failed:", error);
-                respectButton.disabled = true;
-            }
+            }, 1500);
+            
+            // Use 'click' event for better mobile compatibility
+            respectButton.addEventListener('click', handleInteraction);
         }
-        
-        // Use 'click' event for better mobile compatibility
-        respectButton.addEventListener('click', handleInteraction);
 
-        initializeAppAndAuth();
+        // Run initialize after the page has fully loaded
+        window.addEventListener('load', initialize);
     </script>
 </body>
 </html>
