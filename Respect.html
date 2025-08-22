@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pay Respects</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for the page and animations */
+        body {
+            font-family: 'Inter', sans-serif;
+            touch-action: manipulation; /* Prevents double-tap zoom on mobile */
+        }
+
+        /* The main button's glowing effect */
+        .respect-button {
+            box-shadow: 0 0 15px rgba(79, 70, 229, 0.5), 0 0 30px rgba(79, 70, 229, 0.3), inset 0 0 10px rgba(79, 70, 229, 0.2);
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* The button's pressed state */
+        .respect-button:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 5px rgba(79, 70, 229, 0.7), 0 0 15px rgba(79, 70, 229, 0.5), inset 0 0 5px rgba(79, 70, 229, 0.4);
+        }
+
+        /* Style for the animated particles */
+        .particle {
+            position: absolute;
+            background-color: #a5b4fc; /* Light indigo color */
+            border-radius: 50%;
+            pointer-events: none;
+            animation: fly-out 1.2s ease-out forwards;
+            opacity: 0.9;
+        }
+
+        /* Keyframe animation for particles flying outwards */
+        @keyframes fly-out {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 0.9;
+            }
+            100% {
+                transform: translate(var(--x), var(--y)) scale(0);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white overflow-hidden">
+
+    <!-- Main container -->
+    <div class="min-h-screen flex flex-col items-center justify-center p-4 relative z-10">
+        
+        <!-- Header Text -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-6xl font-black text-gray-200 tracking-tight">Show Your Respect</h1>
+            <p class="text-lg md:text-xl text-indigo-300 mt-2">Press the button to pay respects</p>
+        </header>
+
+        <!-- Respect Counter -->
+        <div class="mb-12 text-center">
+            <p id="respect-counter" class="text-7xl md:text-8xl font-bold text-white transition-transform duration-200">0</p>
+            <p class="text-gray-400 text-sm tracking-widest">RESPECTS PAID</p>
+        </div>
+
+        <!-- The main interactive button -->
+        <button id="respect-button" class="respect-button w-48 h-48 md:w-56 md:h-56 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center text-6xl md:text-7xl font-bold select-none focus:outline-none">
+            R
+        </button>
+
+        <!-- Footer -->
+        <footer class="absolute bottom-4 text-center text-gray-500 text-sm">
+            <p>&copy; 2024. A gesture of digital reverence.</p>
+        </footer>
+
+    </div>
+    
+    <!-- This div will contain the animated particles -->
+    <div id="particle-container" class="absolute top-0 left-0 w-full h-full pointer-events-none"></div>
+
+    <script>
+        // --- DOM Element References ---
+        const respectButton = document.getElementById('respect-button');
+        const respectCounter = document.getElementById('respect-counter');
+        const particleContainer = document.getElementById('particle-container');
+
+        // --- State ---
+        let count = 0;
+
+        // --- Functions ---
+
+        /**
+         * Updates the counter display with a subtle animation.
+         */
+        function updateCounter() {
+            respectCounter.textContent = count;
+            // Add a little "pop" effect to the counter
+            respectCounter.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                respectCounter.style.transform = 'scale(1)';
+            }, 150);
+        }
+
+        /**
+         * Creates and animates particles emanating from the button.
+         * @param {number} x - The starting x-coordinate.
+         * @param {number} y - The starting y-coordinate.
+         */
+        function createParticles(x, y) {
+            const particleCount = 20; // How many particles to create per click
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Set initial position at the click/touch location
+                particle.style.left = `${x}px`;
+                particle.style.top = `${y}px`;
+
+                // Randomize particle properties for a natural look
+                const size = Math.random() * 8 + 2; // Size between 2px and 10px
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+
+                const angle = Math.random() * 360; // Random direction
+                const distance = Math.random() * 150 + 50; // How far it travels
+                const endX = Math.cos(angle * Math.PI / 180) * distance;
+                const endY = Math.sin(angle * Math.PI / 180) * distance;
+
+                // Set CSS custom properties for the animation
+                particle.style.setProperty('--x', `${endX}px`);
+                particle.style.setProperty('--y', `${endY}px`);
+
+                particleContainer.appendChild(particle);
+
+                // Remove the particle from the DOM after the animation finishes
+                setTimeout(() => {
+                    particle.remove();
+                }, 1200); // Must match the animation duration
+            }
+        }
+
+        /**
+         * Handles the main interaction event.
+         * @param {MouseEvent|TouchEvent} event - The click or touch event.
+         */
+        function handleInteraction(event) {
+            // Prevent default behavior like text selection
+            event.preventDefault();
+
+            // Increment the counter and update the display
+            count++;
+            updateCounter();
+
+            // Determine the coordinates for the particle effect
+            let x, y;
+            if (event.type.startsWith('touch')) {
+                // For touch events
+                x = event.touches[0].clientX;
+                y = event.touches[0].clientY;
+            } else {
+                // For mouse events
+                x = event.clientX;
+                y = event.clientY;
+            }
+
+            // Trigger the particle animation
+            createParticles(x, y);
+        }
+
+        // --- Event Listeners ---
+        // We listen for both mouse and touch events for wide compatibility
+        respectButton.addEventListener('mousedown', handleInteraction);
+        respectButton.addEventListener('touchstart', handleInteraction);
+
+    </script>
+</body>
+</html>
