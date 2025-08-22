@@ -295,9 +295,9 @@
                 respectButton.disabled = true;
             }
         }
-
-        respectButton.addEventListener('mousedown', handleInteraction);
-        respectButton.addEventListener('touchstart', handleInteraction);
+        
+        // **FIX**: Use 'click' event for better mobile compatibility
+        respectButton.addEventListener('click', handleInteraction);
 
         initializeAppAndAuth();
     </script>
